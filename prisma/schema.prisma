@@ -1,0 +1,100 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = "file:./dev.db"
+}
+
+model User {
+  id              String   @id @default(cuid())
+  email           String   @unique
+  password        String
+  firstName       String
+  lastName        String
+  isEmailVerified Boolean  @default(false)
+  resetToken      String?
+  resetTokenExpiry DateTime?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  
+  // Subscription fields
+  subscriptionId     String?
+  subscriptionStatus String   @default("trial") // "trial", "active", "cancelled", "expired"
+  planType          String   @default("free")   // "free", "starter", "professional", "enterprise"
+  planStartDate     DateTime @default(now())
+  planEndDate       DateTime?
+  maxWebsites       Int      @default(3)
+  maxCheckInterval  Int      @default(300)     // in seconds (5 minutes for free)
+  
+  // Relations
+  websites        Website[]
+  
+  @@map("users")
+}
+
+model Website {
+  id          String   @id @default(cuid())
+  name        String
+  url         String   
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  // User relation
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  // Current status fields
+  status          String   @default("unknown") // "up", "down", "unknown"
+  lastChecked     DateTime?
+  responseTime    Int?     // in milliseconds
+  lastDowntime    DateTime?
+  
+  // Relations
+  downtimeLogs    DowntimeLog[]
+  uptimeChecks    UptimeCheck[]
+  
+  @@map("websites")
+}
+
+model DowntimeLog {
+  id          String   @id @default(cuid())
+  websiteId   String
+  startTime   DateTime
+  endTime     DateTime?
+  reason      String?  // Error message or reason for downtime
+  createdAt   DateTime @default(now())
+  
+  // Relations
+  website     Website  @relation(fields: [websiteId], references: [id], onDelete: Cascade)
+  
+  @@map("downtime_logs")
+}
+
+model UptimeCheck {
+  id           String   @id @default(cuid())
+  websiteId    String
+  status       String   // "up", "down"
+  responseTime Int?     // in milliseconds
+  timestamp    DateTime @default(now())
+  
+  // Relations
+  website      Website  @relation(fields: [websiteId], references: [id], onDelete: Cascade)
+  
+  @@map("uptime_checks")
+}
+
+model EmailVerification {
+  id        String   @id @default(cuid())
+  email     String
+  token     String   @unique
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+  
+  @@map("email_verifications")
+}
