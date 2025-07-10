@@ -279,12 +279,12 @@ async function checkWebsite(website) {
 
     if (newStatus === 'up' && previousStatus === 'down') {
       console.log(`✅ ${website.name} is back up`);
-      //   await sendAlertEmail(
-      //   website.url,
-      //   website.user.email,
-      //   `🚀 ${website.name} is BACK UP`,
-      //   `URL: ${website.url} is back up at ${new Date().toLocaleString()}`
-      // );
+        await sendAlertEmail(
+        website.url,
+        website.user.email,
+        `🚀 ${website.name} is BACK UP`,
+        `URL: ${website.url} is back up at ${new Date().toLocaleString()}`
+      );
     }
 
     statusCache.set(website.id, newStatus);
@@ -325,12 +325,12 @@ async function checkWebsite(website) {
 
     if (newStatus === 'down' && previousStatus !== 'down') {
       console.log(`🔔 Alert: ${website.name} went down`);
-      // await sendAlertEmail(
-      //   website.url,
-      //   website.user.email,
-      //   `🚨 ${website.name} is DOWN`,
-      //   `URL: ${website.url} went down at ${new Date().toLocaleString()}`
-      // );
+      await sendAlertEmail(
+        website.url,
+        website.user.email,
+        `🚨 ${website.name} is DOWN`,
+        `URL: ${website.url} went down at ${new Date().toLocaleString()}`
+      );
     }
     statusCache.set(website.id, newStatus);
     // Update website status to down
@@ -524,7 +524,7 @@ function startAIPredictions() {
     } catch (error) {
       console.error('❌ AI prediction cycle failed:', error);
     }
-  }, 60 * 60 * 1000); // 60 minutes
+  }, 30 * 60 * 1000); // 60 minutes
 
   // Run initial predictions after 5 minutes
   setTimeout(async () => {
@@ -535,7 +535,7 @@ function startAIPredictions() {
     } catch (error) {
       console.error('❌ Initial AI predictions failed:', error);
     }
-  }, 30 * 60 * 1000); // 5 minutes
+  }, 5 * 60 * 1000); // 5 minutes
 }
 
 function stopMonitoring() {
