@@ -6,10 +6,9 @@ import Dashboard from './components/Dashboard';
 import AnalyticsDashboard from './components/AnalyticsDashboard';
 import AddWebsiteModal from './components/AddWebsiteModal';
 import EditWebsiteModal from './components/EditWebsiteModal';
-import axios from 'axios';
+import ResetPasswordPage from './components/ResetPasswordPage';
 import { Plus, Activity, Globe, RefreshCw, Zap, TrendingUp, Shield, BarChart3, User, LogOut, Settings, CreditCard } from 'lucide-react';
-import { set } from 'date-fns';
-
+import axios from 'axios';
 const API_BASE = import.meta.env.PROD ? '/api' : 'http://localhost:3001/api';
 
 function App() {
@@ -25,19 +24,28 @@ function App() {
   const [showAddModal, setShowAddModal] = useState(false);
   const [editingWebsite, setEditingWebsite] = useState(null);
   const [error, setError] = useState(null);
-  const [userData, setUserData] = useState({
+  const [resetToken, setResetToken] = useState(null);
+   const [userData, setUserData] = useState({
     firstName: '',
     lastName: '',
     planType: '',
   });
 
-
   useEffect(() => {
+    // Check for reset password token in URL
+    const urlParams = new URLSearchParams(window.location.search);
+    const resetTokenFromUrl = urlParams.get('token');
+    
+    if (resetTokenFromUrl) {
+      setResetToken(resetTokenFromUrl);
+      setLoading(false);
+      return;
+    }
+
     // Check if user is logged in
-    const token = localStorage.getItem('token');
+    const authToken = localStorage.getItem('token');
     const user = localStorage.getItem('user');
-    console.log('Token:', token);
-    const fetchUser = async () => {
+        const fetchUser = async () => {
       try {
         const token = localStorage.getItem('token'); // or sessionStorage.getItem('authToken')
 
@@ -59,12 +67,12 @@ function App() {
     };
 
     fetchUser();
-    if (token && user) {
+    
+    if (authToken && user) {
       setIsAuthenticated(true);
       setCurrentUser(JSON.parse(user));
       
       // Check for successful payment
-      const urlParams = new URLSearchParams(window.location.search);
       const sessionId = urlParams.get('session_id');
       if (sessionId) {
         handlePaymentSuccess(sessionId);
@@ -89,14 +97,14 @@ function App() {
     try {
       if (showRefreshIndicator) setRefreshing(true);
       setError(null);
-
+      
       const token = localStorage.getItem('token');
       const response = await fetch(`${API_BASE}/websites`, {
         headers: {
           'Authorization': `Bearer ${token}`
         }
       });
-
+      
       if (!response.ok) {
         if (response.status === 401) {
           handleLogout();
@@ -104,7 +112,7 @@ function App() {
         }
         throw new Error(`HTTP error! status: ${response.status}`);
       }
-
+      
       const data = await response.json();
       setWebsites(data);
     } catch (error) {
@@ -133,10 +141,10 @@ function App() {
         const updatedUser = { ...currentUser, ...data.subscription };
         setCurrentUser(updatedUser);
         localStorage.setItem('user', JSON.stringify(updatedUser));
-
+        
         // Refresh websites to apply new limits
         await fetchWebsites();
-
+        
         alert('Payment successful! Your subscription has been activated.');
       }
     } catch (error) {
@@ -155,7 +163,7 @@ function App() {
       const token = localStorage.getItem('token');
       const response = await fetch(`${API_BASE}/websites`, {
         method: 'POST',
-        headers: {
+        headers: { 
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${token}`
         },
@@ -163,7 +171,7 @@ function App() {
       });
 
       const data = await response.json();
-
+      
       if (response.ok) {
         await fetchWebsites();
         setShowAddModal(false);
@@ -182,7 +190,7 @@ function App() {
       const token = localStorage.getItem('token');
       const response = await fetch(`${API_BASE}/websites/${id}`, {
         method: 'PUT',
-        headers: {
+        headers: { 
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${token}`
         },
@@ -259,11 +267,33 @@ function App() {
     }));
   };
 
+  const handleResetPasswordSuccess = () => {
+    setResetToken(null);
+    setAuthMode('signin');
+    setShowAuthModal(true);
+    // Clean up URL
+    window.history.replaceState({}, document.title, window.location.pathname);
+  };
+
+  // Show reset password page if token is present
+  if (resetToken) {
+    return (
+      <ResetPasswordPage 
+        token={resetToken}
+        onSuccess={handleResetPasswordSuccess}
+        onCancel={() => {
+          setResetToken(null);
+          window.history.replaceState({}, document.title, window.location.pathname);
+        }}
+      />
+    );
+  }
+
   // Show landing page if not authenticated
   if (!isAuthenticated && !loading) {
     return (
       <>
-        <LandingPage
+        <LandingPage 
           onGetStarted={handleGetStarted}
           onSignIn={handleSignIn}
         />
@@ -347,36 +377,37 @@ function App() {
               <div>
                 <h1 className="text-3xl font-bold gradient-text">Uptime Monitor</h1>
                 <p className="text-sm text-gray-500 font-medium">
-                  Welcome back, {userData.firstName}!
+                  Welcome back, {userData.firstName}
                 </p>
               </div>
+            </div>
+            
+            <div className="flex items-center space-x-8">
               {/* Navigation */}
               <nav className="hidden md:flex items-center space-x-2 bg-white/50 rounded-2xl p-2">
                 <button
                   onClick={() => setCurrentView('dashboard')}
-                  className={`flex items-center space-x-2 px-4 py-2 rounded-xl transition-all duration-200 ${currentView === 'dashboard'
-                      ? 'bg-white shadow-md text-blue-600'
+                  className={`flex items-center space-x-2 px-4 py-2 rounded-xl transition-all duration-200 ${
+                    currentView === 'dashboard' 
+                      ? 'bg-white shadow-md text-blue-600' 
                       : 'text-gray-600 hover:text-gray-900 hover:bg-white/50'
-                    }`}
+                  }`}
                 >
                   <Activity className="h-4 w-4" />
                   <span className="font-medium">Dashboard</span>
                 </button>
                 <button
                   onClick={() => setCurrentView('analytics')}
-                  className={`flex items-center space-x-2 px-4 py-2 rounded-xl transition-all duration-200 ${currentView === 'analytics'
-                      ? 'bg-white shadow-md text-purple-600'
+                  className={`flex items-center space-x-2 px-4 py-2 rounded-xl transition-all duration-200 ${
+                    currentView === 'analytics' 
+                      ? 'bg-white shadow-md text-purple-600' 
                       : 'text-gray-600 hover:text-gray-900 hover:bg-white/50'
-                    }`}
+                  }`}
                 >
                   <BarChart3 className="h-4 w-4" />
                   <span className="font-medium">Analytics</span>
                 </button>
               </nav>
-            </div>
-
-            <div className="flex items-center space-x-8">
-
 
               {/* Stats Overview */}
               <div className="hidden xl:flex items-center space-x-6">
@@ -399,7 +430,7 @@ function App() {
                   <span className="text-blue-700 font-semibold">{websites.length} Total</span>
                 </div>
               </div>
-
+              
               <div className="flex items-center space-x-3">
                 {/* User Menu */}
                 <div className="relative group">
@@ -412,7 +443,7 @@ function App() {
                       <p className="text-xs text-gray-500 capitalize">{userData.planType} Plan</p>
                     </div>
                   </button>
-
+                  
                   <div className="absolute right-0 top-16 w-48 glass-card rounded-2xl shadow-xl border border-white/20 py-2 z-20 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200">
                     <button
                       onClick={() => setShowPricingModal(true)}
@@ -430,7 +461,7 @@ function App() {
                     </button>
                   </div>
                 </div>
-
+                
                 <button
                   onClick={handleRefresh}
                   disabled={refreshing}
@@ -439,7 +470,7 @@ function App() {
                 >
                   <RefreshCw className={`h-5 w-5 ${refreshing ? 'animate-spin' : 'group-hover:rotate-180'} transition-transform duration-500`} />
                 </button>
-
+                
                 <button
                   onClick={() => setShowAddModal(true)}
                   disabled={websites.filter(w => w.isActive).length >= currentUser?.maxWebsites}
@@ -470,7 +501,7 @@ function App() {
                 </div>
               </div>
             </div>
-
+            
             <div className="metric-card">
               <div className="flex items-center justify-between">
                 <div>
@@ -482,7 +513,7 @@ function App() {
                 </div>
               </div>
             </div>
-
+            
             <div className="metric-card">
               <div className="flex items-center justify-between">
                 <div>
@@ -494,7 +525,7 @@ function App() {
                 </div>
               </div>
             </div>
-
+            
             <div className="metric-card">
               <div className="flex items-center justify-between">
                 <div>
@@ -513,12 +544,11 @@ function App() {
       {/* Main Content */}
       {isAuthenticated && (
         <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-12">
-          <Dashboard
-            websites={websites}
-            onEditWebsite={setEditingWebsite}
-            onDeleteWebsite={handleDeleteWebsite}
-            
-              />
+        <Dashboard 
+          websites={websites}
+          onEditWebsite={setEditingWebsite}
+          onDeleteWebsite={handleDeleteWebsite}
+        />
         </main>
       )}
 
