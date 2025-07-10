@@ -912,8 +912,8 @@ SOFTWARE.
 
 **⭐ Star this repository if you find it helpful!**
 
-Made with ❤️ by the UptimeMonitor team
+Made with ❤️ by Parikshit Pandey
 
-[🌟 Star](https://github.com/yourusername/uptime-monitor) • [🐛 Report Bug](https://github.com/yourusername/uptime-monitor/issues) • [💡 Request Feature](https://github.com/yourusername/uptime-monitor/issues)
+[🌟 Star](https://github.com/Parikshit2304/Better-Uptime_SAAS.git) • [🐛 Report Bug](https://github.com/Parikshit2304/Better-Uptime_SAAS.gitissues) • [💡 Request Feature](https://github.com/Parikshit2304/Better-Uptime_SAAS.gitissues)
 
 </div>
