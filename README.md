@@ -2,7 +2,7 @@
 
 <div align="center">
 
-![UptimeMonitor Logo](https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=800&h=400&fit=crop&crop=center)
+![UptimeMonitor Logo](./images/LandingPage.png)
 
 **Monitor your websites like a pro with real-time alerts, advanced analytics, and AI-powered predictions**
 
@@ -10,6 +10,7 @@
 [![Node.js](https://img.shields.io/badge/Node.js-18+-green.svg)](https://nodejs.org/)
 [![React](https://img.shields.io/badge/React-18+-blue.svg)](https://reactjs.org/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-Ready-blue.svg)](https://www.typescriptlang.org/)
+
 
 [🌟 Features](#-features) • [🚀 Quick Start](#-quick-start) • [📖 Documentation](#-documentation) • [🔧 Configuration](#-configuration) • [🤝 Contributing](#-contributing)
 
@@ -38,7 +39,7 @@
 ---
 
 ## 🌟 Features
-
+![Features Page](./images/Features.png)
 ### 🔍 **Real-Time Monitoring**
 - **Multi-frequency checks**: 15 seconds to 5 minutes based on your plan
 - **Global monitoring**: Check from multiple locations worldwide
@@ -73,7 +74,7 @@
 
 ## 🏗️ Architecture
 
-![Architecture Diagram](https://images.unsplash.com/photo-1558494949-ef010cbdcc31?w=800&h=400&fit=crop&crop=center)
+
 
 ### **Technology Stack**
 
@@ -217,7 +218,7 @@ npm run dev
 
 ### **Stripe Setup**
 
-![Stripe Dashboard](https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?w=800&h=400&fit=crop&crop=center)
+![Stripe Dashboard](./images/StripeCheckOut.png)
 
 1. **Create Stripe Account**
    - Visit [Stripe Dashboard](https://dashboard.stripe.com)
@@ -270,7 +271,7 @@ FROM_EMAIL=noreply@yourdomain.com
 
 ### **Dashboard Overview**
 
-![Dashboard Screenshot](https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=800&h=400&fit=crop&crop=center)
+![Dashboard Screenshot](./images/Dashboard.png)
 
 The main dashboard provides:
 - **Real-time status** of all monitored websites
@@ -279,7 +280,7 @@ The main dashboard provides:
 - **Quick actions** for adding, editing, and managing websites
 
 ### **Adding Websites**
-
+![Add Websites](./images/AddWebsiteComponent.png)
 1. **Click "Add Website"** button in the header
 2. **Enter website details**:
    - Name (e.g., "My Company Website")
@@ -288,7 +289,7 @@ The main dashboard provides:
 4. **Start monitoring** immediately
 
 ### **Monitoring Features**
-
+![Pricing](./images/Pricing.png)
 #### **Real-Time Checks**
 - **Frequency**: Based on your subscription plan
   - Free: 5-minute intervals
@@ -309,7 +310,7 @@ The main dashboard provides:
 
 ### **Analytics Dashboard**
 
-![Analytics Dashboard](https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=800&h=400&fit=crop&crop=center)
+![Analytics Dashboard](./images/AnalyticsDashboard.png)
 
 Access detailed analytics by clicking "Analytics" in the navigation:
 
@@ -339,7 +340,7 @@ Access detailed analytics by clicking "Analytics" in the navigation:
 
 ### **AI-Powered Predictions** *(Professional & Enterprise)*
 
-![AI Predictions](https://images.unsplash.com/photo-1677442136019-21780ecad995?w=800&h=400&fit=crop&crop=center)
+![AI Predictions](./images/AIprediction.png)
 
 #### **Outage Prediction**
 - **Risk assessment**: Low, Medium, High, Critical
@@ -458,7 +459,7 @@ For large organizations:
 2. **Email verification** (optional, configurable)
 3. **14-day free trial** automatically activated
 4. **Plan selection** and payment processing
-
+![Register](./images/Register.png)
 #### **Authentication Features**
 - **JWT-based authentication** with secure token management
 - **Password reset** via email with secure tokens
@@ -490,7 +491,7 @@ sequenceDiagram
     Backend->>Frontend: Password updated
     Frontend->>User: Success message
 ```
-
+![Reset Page](./images/ResetPasswordPage.png)
 ---
 
 ## 📡 API Reference
