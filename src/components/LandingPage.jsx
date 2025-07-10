@@ -11,7 +11,8 @@ import {
   ArrowRight,
   BarChart3,
   Bell,
-  Smartphone
+  Smartphone,
+  Brain
 } from 'lucide-react';
 
 function LandingPage({ onGetStarted, onSignIn }) {
@@ -32,9 +33,9 @@ function LandingPage({ onGetStarted, onSignIn }) {
       description: "Detailed insights, performance metrics, and historical data analysis"
     },
     {
-      icon: <Globe className="h-6 w-6" />,
-      title: "Global Monitoring",
-      description: "Monitor from multiple locations worldwide for accurate results"
+      icon: <Brain className="h-6 w-6" />,
+      title: "AI Outage Predictions",
+      description: "Predict potential outages with AI-driven insights to prevent downtime"
     },
     {
       icon: <Shield className="h-6 w-6" />,
@@ -78,8 +79,7 @@ function LandingPage({ onGetStarted, onSignIn }) {
       features: [
         "3 websites",
         "5-minute checks",
-        "Basic alerts",
-        "7-day history"
+        "Basic alerts"
       ],
       popular: false,
       cta: "Start Free"
@@ -93,7 +93,6 @@ function LandingPage({ onGetStarted, onSignIn }) {
         "10 websites",
         "1-minute checks",
         "Email alerts",
-        "30-day history",
         "Basic analytics"
       ],
       popular: true,
@@ -110,6 +109,7 @@ function LandingPage({ onGetStarted, onSignIn }) {
         "SMS + Email alerts",
         "90-day history",
         "Advanced analytics",
+        "AI Outage predictions",
         "API access"
       ],
       popular: false,
@@ -126,6 +126,7 @@ function LandingPage({ onGetStarted, onSignIn }) {
         "All alert types",
         "Unlimited history",
         "Full analytics",
+        "Detailed AI Predictions",
         "API access",
         "Priority support"
       ],

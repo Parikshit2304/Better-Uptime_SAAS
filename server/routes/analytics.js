@@ -2,9 +2,12 @@ const express = require('express');
 const { PrismaClient } = require('@prisma/client');
 const router = express.Router();
 const prisma = new PrismaClient();
+const { authenticateToken } = require('../middleware/auth');
+
 
 // Get analytics data
-router.get('/', async (req, res) => {
+router.get('/', authenticateToken,async (req, res) => {
+  
   try {
     const { website = 'all', range = '7d' } = req.query;
     
@@ -34,7 +37,10 @@ router.get('/', async (req, res) => {
 
     // Get all websites for the filter
     const websites = await prisma.website.findMany({
-      where: website === 'all' ? {} : { id: website },
+      where: {
+    userId: req.user.id,
+    ...(website !== 'all' && { id: website })
+  },
       include: {
         downtimeLogs: {
           where: {
@@ -56,7 +62,7 @@ router.get('/', async (req, res) => {
     // Get historical data
     const uptimeHistory = await getUptimeHistory(websites, startDate, now, range);
     const responseTimeHistory = await getResponseTimeHistory(websites, startDate, now, range);
-    const incidentHistory = await getIncidentHistory(websiteFilter, startDate);
+    const incidentHistory = await getIncidentHistory(websiteFilter, startDate,req.user.id);
     
     // Calculate status distribution
     const statusDistribution = calculateStatusDistribution(websites);
@@ -201,12 +207,14 @@ async function getResponseTimeHistory(websites, startDate, endDate, range) {
   return history;
 }
 
-async function getIncidentHistory(websiteFilter, startDate) {
+async function getIncidentHistory(websiteFilter, startDate,userId) {
   const incidents = await prisma.downtimeLog.findMany({
     where: {
-      ...websiteFilter,
-      startTime: { gte: startDate }
-    },
+    ...websiteFilter,
+    startTime: { gte: startDate },
+    website: {
+      userId: userId
+    }},
     include: {
       website: true
     },

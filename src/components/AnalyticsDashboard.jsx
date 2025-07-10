@@ -29,6 +29,7 @@ import {
 } from 'lucide-react';
 import App from '../App';
 import Dashboard from './Dashboard';
+import AIPredictionCard from './AiPredictionCard';
 ChartJS.register(
   CategoryScale,
   LinearScale,
@@ -129,7 +130,6 @@ function AnalyticsDashboard() {
     statusDistribution,
     performanceMetrics
   } = analyticsData;
-
   // Chart configurations
   const uptimeChartData = {
     labels: uptimeHistory.map(item => format(new Date(item.date), 'MMM dd')),
@@ -371,7 +371,7 @@ function AnalyticsDashboard() {
             </div>
           </div>
         </div>
-
+                  
         {/* Overview Stats */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
           <div className="metric-card">

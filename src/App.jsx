@@ -6,8 +6,9 @@ import Dashboard from './components/Dashboard';
 import AnalyticsDashboard from './components/AnalyticsDashboard';
 import AddWebsiteModal from './components/AddWebsiteModal';
 import EditWebsiteModal from './components/EditWebsiteModal';
+import ResetPasswordPage from './components/ResetPasswordPage';
 import { Plus, Activity, Globe, RefreshCw, Zap, TrendingUp, Shield, BarChart3, User, LogOut, Settings, CreditCard } from 'lucide-react';
-
+import axios from 'axios';
 const API_BASE = import.meta.env.PROD ? '/api' : 'http://localhost:3001/api';
 
 function App() {
@@ -23,18 +24,55 @@ function App() {
   const [showAddModal, setShowAddModal] = useState(false);
   const [editingWebsite, setEditingWebsite] = useState(null);
   const [error, setError] = useState(null);
+  const [resetToken, setResetToken] = useState(null);
+   const [userData, setUserData] = useState({
+    firstName: '',
+    lastName: '',
+    planType: '',
+  });
 
   useEffect(() => {
-    // Check if user is logged in
-    const token = localStorage.getItem('token');
-    const user = localStorage.getItem('user');
+    // Check for reset password token in URL
+    const urlParams = new URLSearchParams(window.location.search);
+    const resetTokenFromUrl = urlParams.get('token');
     
-    if (token && user) {
+    if (resetTokenFromUrl) {
+      setResetToken(resetTokenFromUrl);
+      setLoading(false);
+      return;
+    }
+
+    // Check if user is logged in
+    const authToken = localStorage.getItem('token');
+    const user = localStorage.getItem('user');
+        const fetchUser = async () => {
+      try {
+        const token = localStorage.getItem('token'); // or sessionStorage.getItem('authToken')
+
+        const res = await axios.get(`${API_BASE}/user/me`, {
+          headers: {
+            Authorization: `Bearer ${token}`, // Add token to Authorization header
+          },
+        });
+        console.log('User data fetched:', res.data);
+
+        setUserData({
+          firstName: res.data.firstName,
+          lastName: res.data.lastName,
+          planType: res.data.planType,
+        });
+      } catch (error) {
+        console.error('Error fetching user data:', error);
+      }
+    };
+
+    fetchUser();
+    
+    if (authToken && user) {
       setIsAuthenticated(true);
       setCurrentUser(JSON.parse(user));
       
       // Check for successful payment
-      const urlParams = new URLSearchParams(window.location.search);
       const sessionId = urlParams.get('session_id');
       if (sessionId) {
         handlePaymentSuccess(sessionId);
@@ -229,6 +267,28 @@ function App() {
     }));
   };
 
+  const handleResetPasswordSuccess = () => {
+    setResetToken(null);
+    setAuthMode('signin');
+    setShowAuthModal(true);
+    // Clean up URL
+    window.history.replaceState({}, document.title, window.location.pathname);
+  };
+
+  // Show reset password page if token is present
+  if (resetToken) {
+    return (
+      <ResetPasswordPage 
+        token={resetToken}
+        onSuccess={handleResetPasswordSuccess}
+        onCancel={() => {
+          setResetToken(null);
+          window.history.replaceState({}, document.title, window.location.pathname);
+        }}
+      />
+    );
+  }
+
   // Show landing page if not authenticated
   if (!isAuthenticated && !loading) {
     return (
@@ -317,9 +377,12 @@ function App() {
               <div>
                 <h1 className="text-3xl font-bold gradient-text">Uptime Monitor</h1>
                 <p className="text-sm text-gray-500 font-medium">
-                  Welcome back, {currentUser?.firstName}
+                  Welcome back, {userData.firstName}
                 </p>
               </div>
+            </div>
+            
+            <div className="flex items-center space-x-8">
               {/* Navigation */}
               <nav className="hidden md:flex items-center space-x-2 bg-white/50 rounded-2xl p-2">
                 <button
@@ -345,10 +408,6 @@ function App() {
                   <span className="font-medium">Analytics</span>
                 </button>
               </nav>
-            </div>
-            
-            <div className="flex items-center space-x-8">
-              
 
               {/* Stats Overview */}
               <div className="hidden xl:flex items-center space-x-6">
@@ -380,8 +439,8 @@ function App() {
                       <User className="h-4 w-4 text-white" />
                     </div>
                     <div className="hidden md:block text-left">
-                      <p className="text-sm font-semibold text-gray-900">{currentUser?.firstName} {currentUser?.lastName}</p>
-                      <p className="text-xs text-gray-500 capitalize">{currentUser?.planType} Plan</p>
+                      <p className="text-sm font-semibold text-gray-900">{userData.firstName} {userData.lastName}</p>
+                      <p className="text-xs text-gray-500 capitalize">{userData.planType} Plan</p>
                     </div>
                   </button>
                   
