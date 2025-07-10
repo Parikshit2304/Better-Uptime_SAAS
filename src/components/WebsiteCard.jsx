@@ -1,8 +1,10 @@
 import React, { useState } from 'react';
-import { Globe, Clock, MoreVertical, Edit, Trash2, ExternalLink, Pause, Play, Activity, AlertTriangle } from 'lucide-react';
+import { Globe, Clock, MoreVertical, Edit, Trash2, ExternalLink, Pause, Play, Activity, AlertTriangle, BarChart3 } from 'lucide-react';
+import WebsiteAnalytics from './WebsiteAnalytics';
 
 function WebsiteCard({ website, onEdit, onDelete }) {
   const [showMenu, setShowMenu] = useState(false);
+  const [showAnalytics, setShowAnalytics] = useState(false);
   
   const {
     name,
@@ -96,6 +98,16 @@ function WebsiteCard({ website, onEdit, onDelete }) {
                 >
                   <Edit className="h-4 w-4" />
                   <span>Edit Website</span>
+                </button>
+                <button
+                  onClick={() => {
+                    setShowAnalytics(true);
+                    setShowMenu(false);
+                  }}
+                  className="flex items-center space-x-3 px-4 py-3 text-sm text-gray-700 hover:bg-blue-50 w-full text-left transition-colors rounded-xl mx-2"
+                >
+                  <BarChart3 className="h-4 w-4" />
+                  <span>View Analytics</span>
                 </button>
                 <button
                   onClick={() => {
@@ -233,6 +245,14 @@ function WebsiteCard({ website, onEdit, onDelete }) {
           </div>
         )}
       </div>
+
+      {/* Analytics Modal */}
+      {showAnalytics && (
+        <WebsiteAnalytics
+          website={website}
+          onClose={() => setShowAnalytics(false)}
+        />
+      )}
     </div>
   );
 }

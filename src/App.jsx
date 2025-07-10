@@ -6,7 +6,9 @@ import Dashboard from './components/Dashboard';
 import AnalyticsDashboard from './components/AnalyticsDashboard';
 import AddWebsiteModal from './components/AddWebsiteModal';
 import EditWebsiteModal from './components/EditWebsiteModal';
+import axios from 'axios';
 import { Plus, Activity, Globe, RefreshCw, Zap, TrendingUp, Shield, BarChart3, User, LogOut, Settings, CreditCard } from 'lucide-react';
+import { set } from 'date-fns';
 
 const API_BASE = import.meta.env.PROD ? '/api' : 'http://localhost:3001/api';
 
@@ -23,12 +25,40 @@ function App() {
   const [showAddModal, setShowAddModal] = useState(false);
   const [editingWebsite, setEditingWebsite] = useState(null);
   const [error, setError] = useState(null);
+  const [userData, setUserData] = useState({
+    firstName: '',
+    lastName: '',
+    planType: '',
+  });
+
 
   useEffect(() => {
     // Check if user is logged in
     const token = localStorage.getItem('token');
     const user = localStorage.getItem('user');
-    
+    console.log('Token:', token);
+    const fetchUser = async () => {
+      try {
+        const token = localStorage.getItem('token'); // or sessionStorage.getItem('authToken')
+
+        const res = await axios.get(`${API_BASE}/user/me`, {
+          headers: {
+            Authorization: `Bearer ${token}`, // Add token to Authorization header
+          },
+        });
+        console.log('User data fetched:', res.data);
+
+        setUserData({
+          firstName: res.data.firstName,
+          lastName: res.data.lastName,
+          planType: res.data.planType,
+        });
+      } catch (error) {
+        console.error('Error fetching user data:', error);
+      }
+    };
+
+    fetchUser();
     if (token && user) {
       setIsAuthenticated(true);
       setCurrentUser(JSON.parse(user));
@@ -59,14 +89,14 @@ function App() {
     try {
       if (showRefreshIndicator) setRefreshing(true);
       setError(null);
-      
+
       const token = localStorage.getItem('token');
       const response = await fetch(`${API_BASE}/websites`, {
         headers: {
           'Authorization': `Bearer ${token}`
         }
       });
-      
+
       if (!response.ok) {
         if (response.status === 401) {
           handleLogout();
@@ -74,7 +104,7 @@ function App() {
         }
         throw new Error(`HTTP error! status: ${response.status}`);
       }
-      
+
       const data = await response.json();
       setWebsites(data);
     } catch (error) {
@@ -103,10 +133,10 @@ function App() {
         const updatedUser = { ...currentUser, ...data.subscription };
         setCurrentUser(updatedUser);
         localStorage.setItem('user', JSON.stringify(updatedUser));
-        
+
         // Refresh websites to apply new limits
         await fetchWebsites();
-        
+
         alert('Payment successful! Your subscription has been activated.');
       }
     } catch (error) {
@@ -125,7 +155,7 @@ function App() {
       const token = localStorage.getItem('token');
       const response = await fetch(`${API_BASE}/websites`, {
         method: 'POST',
-        headers: { 
+        headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${token}`
         },
@@ -133,7 +163,7 @@ function App() {
       });
 
       const data = await response.json();
-      
+
       if (response.ok) {
         await fetchWebsites();
         setShowAddModal(false);
@@ -152,7 +182,7 @@ function App() {
       const token = localStorage.getItem('token');
       const response = await fetch(`${API_BASE}/websites/${id}`, {
         method: 'PUT',
-        headers: { 
+        headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${token}`
         },
@@ -233,7 +263,7 @@ function App() {
   if (!isAuthenticated && !loading) {
     return (
       <>
-        <LandingPage 
+        <LandingPage
           onGetStarted={handleGetStarted}
           onSignIn={handleSignIn}
         />
@@ -317,38 +347,36 @@ function App() {
               <div>
                 <h1 className="text-3xl font-bold gradient-text">Uptime Monitor</h1>
                 <p className="text-sm text-gray-500 font-medium">
-                  Welcome back, {currentUser?.firstName}
+                  Welcome back, {userData.firstName}!
                 </p>
               </div>
               {/* Navigation */}
               <nav className="hidden md:flex items-center space-x-2 bg-white/50 rounded-2xl p-2">
                 <button
                   onClick={() => setCurrentView('dashboard')}
-                  className={`flex items-center space-x-2 px-4 py-2 rounded-xl transition-all duration-200 ${
-                    currentView === 'dashboard' 
-                      ? 'bg-white shadow-md text-blue-600' 
+                  className={`flex items-center space-x-2 px-4 py-2 rounded-xl transition-all duration-200 ${currentView === 'dashboard'
+                      ? 'bg-white shadow-md text-blue-600'
                       : 'text-gray-600 hover:text-gray-900 hover:bg-white/50'
-                  }`}
+                    }`}
                 >
                   <Activity className="h-4 w-4" />
                   <span className="font-medium">Dashboard</span>
                 </button>
                 <button
                   onClick={() => setCurrentView('analytics')}
-                  className={`flex items-center space-x-2 px-4 py-2 rounded-xl transition-all duration-200 ${
-                    currentView === 'analytics' 
-                      ? 'bg-white shadow-md text-purple-600' 
+                  className={`flex items-center space-x-2 px-4 py-2 rounded-xl transition-all duration-200 ${currentView === 'analytics'
+                      ? 'bg-white shadow-md text-purple-600'
                       : 'text-gray-600 hover:text-gray-900 hover:bg-white/50'
-                  }`}
+                    }`}
                 >
                   <BarChart3 className="h-4 w-4" />
                   <span className="font-medium">Analytics</span>
                 </button>
               </nav>
             </div>
-            
+
             <div className="flex items-center space-x-8">
-              
+
 
               {/* Stats Overview */}
               <div className="hidden xl:flex items-center space-x-6">
@@ -371,7 +399,7 @@ function App() {
                   <span className="text-blue-700 font-semibold">{websites.length} Total</span>
                 </div>
               </div>
-              
+
               <div className="flex items-center space-x-3">
                 {/* User Menu */}
                 <div className="relative group">
@@ -380,11 +408,11 @@ function App() {
                       <User className="h-4 w-4 text-white" />
                     </div>
                     <div className="hidden md:block text-left">
-                      <p className="text-sm font-semibold text-gray-900">{currentUser?.firstName} {currentUser?.lastName}</p>
-                      <p className="text-xs text-gray-500 capitalize">{currentUser?.planType} Plan</p>
+                      <p className="text-sm font-semibold text-gray-900">{userData.firstName} {userData.lastName}</p>
+                      <p className="text-xs text-gray-500 capitalize">{userData.planType} Plan</p>
                     </div>
                   </button>
-                  
+
                   <div className="absolute right-0 top-16 w-48 glass-card rounded-2xl shadow-xl border border-white/20 py-2 z-20 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200">
                     <button
                       onClick={() => setShowPricingModal(true)}
@@ -402,7 +430,7 @@ function App() {
                     </button>
                   </div>
                 </div>
-                
+
                 <button
                   onClick={handleRefresh}
                   disabled={refreshing}
@@ -411,7 +439,7 @@ function App() {
                 >
                   <RefreshCw className={`h-5 w-5 ${refreshing ? 'animate-spin' : 'group-hover:rotate-180'} transition-transform duration-500`} />
                 </button>
-                
+
                 <button
                   onClick={() => setShowAddModal(true)}
                   disabled={websites.filter(w => w.isActive).length >= currentUser?.maxWebsites}
@@ -442,7 +470,7 @@ function App() {
                 </div>
               </div>
             </div>
-            
+
             <div className="metric-card">
               <div className="flex items-center justify-between">
                 <div>
@@ -454,7 +482,7 @@ function App() {
                 </div>
               </div>
             </div>
-            
+
             <div className="metric-card">
               <div className="flex items-center justify-between">
                 <div>
@@ -466,7 +494,7 @@ function App() {
                 </div>
               </div>
             </div>
-            
+
             <div className="metric-card">
               <div className="flex items-center justify-between">
                 <div>
@@ -485,11 +513,12 @@ function App() {
       {/* Main Content */}
       {isAuthenticated && (
         <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-12">
-        <Dashboard 
-          websites={websites}
-          onEditWebsite={setEditingWebsite}
-          onDeleteWebsite={handleDeleteWebsite}
-        />
+          <Dashboard
+            websites={websites}
+            onEditWebsite={setEditingWebsite}
+            onDeleteWebsite={handleDeleteWebsite}
+            
+              />
         </main>
       )}
 

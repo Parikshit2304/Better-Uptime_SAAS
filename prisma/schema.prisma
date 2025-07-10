@@ -40,7 +40,7 @@ model User {
 model Website {
   id          String   @id @default(cuid())
   name        String
-  url         String   
+  url         String
   isActive    Boolean  @default(true)
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
@@ -58,6 +58,7 @@ model Website {
   // Relations
   downtimeLogs    DowntimeLog[]
   uptimeChecks    UptimeCheck[]
+  aiPredictions   AIPrediction[]
   
   @@map("websites")
 }
@@ -97,4 +98,23 @@ model EmailVerification {
   createdAt DateTime @default(now())
   
   @@map("email_verifications")
+}
+
+model AIPrediction {
+  id                    String   @id @default(cuid())
+  websiteId             String
+  riskLevel             String   // "low", "medium", "high", "critical"
+  predictionConfidence  Int      // 0-100
+  predictedOutageWindow String   // JSON string
+  keyRiskFactors        String   // JSON string
+  performanceTrends     String   // JSON string
+  recommendations       String   // JSON string
+  healthScore           Int      // 0-100
+  summary               String
+  createdAt             DateTime @default(now())
+  
+  // Relations
+  website               Website  @relation(fields: [websiteId], references: [id], onDelete: Cascade)
+  
+  @@map("ai_predictions")
 }
