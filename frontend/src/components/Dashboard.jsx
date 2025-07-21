@@ -3,7 +3,8 @@ import WebsiteCard from './WebsiteCard';
 import { Globe, Zap, TrendingUp, Brain } from 'lucide-react';
 import axios from 'axios';
 
-const API_BASE = import.meta.env.PROD ? `${import.meta.env.BACKEND_URL}/api` : 'http://localhost:3001/api';
+//const API_BASE = import.meta.env.PROD ? `${import.meta.env.BACKEND_URL}/api` : 'http://localhost:3001/api';
+const API_BASE =`${import.meta.env.BACKEND_URL}/api`;
 
 function Dashboard({ websites, onEditWebsite, onDeleteWebsite }) {
   const activeWebsites = websites.filter(w => w.isActive);
