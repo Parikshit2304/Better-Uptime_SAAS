@@ -26,7 +26,7 @@ const resetLimiter = rateLimit({
 
 // Email configuration (you'll need to configure this with your email service)
 const transporter = nodemailer.createTransport({
-  // Configure with your email service (Gmail, SendGrid, etc.)
+  // Configure with your email service Gmail
   host: process.env.SMTP_HOST || 'smtp.gmail.com',
   port: process.env.SMTP_PORT || 587,
   secure: false,

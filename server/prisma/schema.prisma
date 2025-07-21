@@ -6,8 +6,8 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
-  url      =  env("DB_URL")
+  provider = "sqlite"
+  url      = "file:./dev.db"
 }
 
 model User {
@@ -117,4 +117,8 @@ model AIPrediction {
   website               Website  @relation(fields: [websiteId], references: [id], onDelete: Cascade)
   
   @@map("ai_predictions")
+}
+generator erd {
+  provider = "prisma-erd-generator"
+  output   = "./ERD.png"
 }

@@ -49,7 +49,7 @@ function App() {
       try {
         const token = localStorage.getItem('token'); // or sessionStorage.getItem('authToken')
 
-        const res = await axios.get(`${API_BASE}/user/me`, {
+        const res = await axios(`${API_BASE}/user/me`, {
           headers: {
             Authorization: `Bearer ${token}`, // Add token to Authorization header
           },

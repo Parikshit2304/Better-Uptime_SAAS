@@ -4,7 +4,8 @@ const helmet = require('helmet');
 const { PrismaClient } = require('@prisma/client');
 const axios = require('axios');
 const rateLimit = require('express-rate-limit');
-const { sendAlertEmail } = require('./nodemailer');
+const { sendAlertEmail } = require('./services/nodemailer');
+const {createMessage} = require('./services/sms'); 
 const statusCache = new Map();
 const app = express();
 const prisma = new PrismaClient();
@@ -26,7 +27,7 @@ app.use(helmet());
 
 // Rate limiting
 const limiter = rateLimit({
-  windowMs:  60 * 1000, // 15 minutes
+  windowMs:  60 * 1000, // 1 minutes
   max: 100 // limit each IP to 100 requests per windowMs
 });
 app.use(limiter);
@@ -285,6 +286,8 @@ async function checkWebsite(website) {
         `🚀 ${website.name} is BACK UP`,
         `URL: ${website.url} is back up at ${new Date().toLocaleString()}`
       );
+      // // Optionally send SMS alert
+      // createMessage().catch(err => console.error('Error sending SMS:', err));
     }
 
     statusCache.set(website.id, newStatus);
@@ -331,6 +334,7 @@ async function checkWebsite(website) {
         `🚨 ${website.name} is DOWN`,
         `URL: ${website.url} went down at ${new Date().toLocaleString()}`
       );
+      // createMessage().catch(err => console.error('Error sending SMS:', err));
     }
     statusCache.set(website.id, newStatus);
     // Update website status to down
