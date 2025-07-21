@@ -38,7 +38,7 @@ ChartJS.register(
   ArcElement
 );
 
-const API_BASE = import.meta.env.PROD ? '/api' : 'http://localhost:3001/api';
+const API_BASE = import.meta.env.PROD ? `${import.meta.env.BACKEND_URL}/api` : 'http://localhost:3001/api';
 
 function WebsiteAnalytics({ website, onClose }) {
   const [analyticsData, setAnalyticsData] = useState(null);

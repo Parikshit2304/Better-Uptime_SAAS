@@ -43,7 +43,7 @@ ChartJS.register(
   TimeScale
 );
 
-const API_BASE = import.meta.env.PROD ? '/api' : 'http://localhost:3001/api';
+const API_BASE = import.meta.env.PROD ? `${import.meta.env.BACKEND_URL}/api` : 'http://localhost:3001/api';
 
 function AnalyticsDashboard() {
   const [websites, setWebsites] = useState([]);

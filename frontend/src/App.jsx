@@ -9,7 +9,7 @@ import EditWebsiteModal from './components/EditWebsiteModal';
 import ResetPasswordPage from './components/ResetPasswordPage';
 import { Plus, Activity, Globe, RefreshCw, Zap, TrendingUp, Shield, BarChart3, User, LogOut, Settings, CreditCard } from 'lucide-react';
 import axios from 'axios';
-const API_BASE = import.meta.env.PROD ? '/api' : 'http://localhost:3001/api';
+const API_BASE = import.meta.env.PROD ? `${import.meta.env.BACKEND_URL}/api` : 'http://localhost:3001/api';
 
 function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
