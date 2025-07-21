@@ -30,7 +30,6 @@
   "devDependencies": {
     "concurrently": "^8.2.2",
     "nodemon": "^3.0.2",
-    "prisma": "^5.7.1",
-    "prisma-erd-generator": "^2.0.4"
+    "prisma": "^5.7.1"
   }
 }

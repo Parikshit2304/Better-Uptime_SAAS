@@ -118,7 +118,4 @@ model AIPrediction {
   
   @@map("ai_predictions")
 }
-generator erd {
-  provider = "prisma-erd-generator"
-  output   = "./ERD.png"
-}
+
