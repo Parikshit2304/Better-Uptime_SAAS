@@ -12,6 +12,7 @@ import axios from 'axios';
 //const API_BASE = import.meta.env.PROD ? `${import.meta.env.BACKEND_URL}/api` : 'http://localhost:3001/api';
 const API_BASE =`${import.meta.env.VITE_BACKEND_URL}/api`;
 
+
 function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [currentUser, setCurrentUser] = useState(null);
