@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Eye, EyeOff, Lock, CheckCircle, AlertCircle, ArrowLeft, Activity } from 'lucide-react';
 
 //const API_BASE = import.meta.env.PROD ? `${import.meta.env.BACKEND_URL}/api` : 'http://localhost:3001/api';
-const API_BASE =`${import.meta.env.BACKEND_URL}/api`;
+const API_BASE =`${import.meta.env.VITE_BACKEND_URL}/api`;
 
 function ResetPasswordPage({ token, onSuccess, onCancel }) {
   const [formData, setFormData] = useState({

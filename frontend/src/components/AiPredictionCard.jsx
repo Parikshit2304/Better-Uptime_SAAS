@@ -16,7 +16,7 @@ import {
 } from 'lucide-react';
 
 // const API_BASE = import.meta.env.PROD ? `${import.meta.env.BACKEND_URL}/api` : 'http://localhost:3001/api';
-const API_BASE =`${import.meta.env.BACKEND_URL}/api`;
+const API_BASE =`${import.meta.env.VITE_BACKEND_URL}/api`;
 
 function AIPredictionCard({ websiteId, websiteName, planType }) {
   const [prediction, setPrediction] = useState(null);
