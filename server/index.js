@@ -33,22 +33,27 @@ const limiter = rateLimit({
 app.use(limiter);
 
 // Middleware
-const allowedOrigins = process.env.NODE_ENV === 'production'
-  ? [process.env.FRONTEND_URL] // keep secure
-  : ['http://localhost:3000', 'http://127.0.0.1:3000'];
-
-app.use(cors({
+const corsOptions = {
   origin: function (origin, callback) {
+    const allowedOrigins = [
+      'http://localhost:3000',
+      'http://127.0.0.1:3000',
+      process.env.FRONTEND_URL,
+    ];
     if (!origin || allowedOrigins.includes(origin)) {
       callback(null, true);
     } else {
       callback(new Error('Not allowed by CORS'));
     }
   },
-  credentials: true,
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization'],
-}));
+};
+
+app.use(cors(corsOptions));
+
+// Also handle preflight OPTIONS requests
+app.options('*', cors(corsOptions));
 app.use(express.json());
 
 // Health check endpoint
