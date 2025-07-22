@@ -33,27 +33,32 @@ const limiter = rateLimit({
 app.use(limiter);
 
 // Middleware
-const corsOptions = {
+app.use(cors({
   origin: function (origin, callback) {
-    const allowedOrigins = [
-      'http://localhost:3000',
-      'http://127.0.0.1:3000',
-      process.env.FRONTEND_URL,
-    ];
+    const allowedOrigins = process.env.NODE_ENV === 'production'
+      ? [process.env.FRONTEND_URL]
+      : ['http://localhost:3000', 'http://127.0.0.1:3000'];
+
     if (!origin || allowedOrigins.includes(origin)) {
       callback(null, true);
     } else {
+      console.warn('Blocked by CORS:', origin);
       callback(new Error('Not allowed by CORS'));
     }
   },
-  methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization'],
-};
+}));
 
-app.use(cors(corsOptions));
-
-// Also handle preflight OPTIONS requests
-app.options('*', cors(corsOptions));
+// ✅ Handles all OPTIONS requests before any route hits
+app.use((req, res, next) => {
+  if (req.method === 'OPTIONS') {
+    res.sendStatus(204);
+  } else {
+    next();
+  }
+});
 app.use(express.json());
 
 // Health check endpoint
