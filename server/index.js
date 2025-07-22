@@ -52,13 +52,7 @@ app.use(cors({
 }));
 
 // ✅ Handles all OPTIONS requests before any route hits
-app.use((req, res, next) => {
-  if (req.method === 'OPTIONS') {
-    res.sendStatus(204);
-  } else {
-    next();
-  }
-});
+app.options('*', cors());
 app.use(express.json());
 
 // Health check endpoint
