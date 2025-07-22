@@ -22,6 +22,14 @@ const aiPredictionService = require('./services/aiPrediction');
 // Global monitoring state
 let monitoringInterval = null;
 let isMonitoring = false;
+
+
+// Middleware
+const corsOptions = {
+  origin: [process.env.FRONTEND_URL || 'http://localhost:3000'],
+};
+
+app.use(cors(corsOptions));
 // Security middleware
 app.use(helmet());
 
@@ -32,12 +40,7 @@ const limiter = rateLimit({
 });
 app.use(limiter);
 
-// Middleware
-const corsOptions = {
-  origin: [process.env.FRONTEND_URL || 'http://localhost:3000'],
-};
 
-app.use(cors(corsOptions));
 app.use(express.json());
 
 // Health check endpoint
