@@ -199,11 +199,101 @@ router.post('/forgot-password', resetLimiter, [
         to: email,
         subject: 'Password Reset Request',
         html: `
-          <h2>Password Reset Request</h2>
-          <p>You requested a password reset. Click the link below to reset your password:</p>
-          <a href="${resetUrl}" style="background: #3b82f6; color: white; padding: 12px 24px; text-decoration: none; border-radius: 8px; display: inline-block;">Reset Password</a>
-          <p>This link will expire in 1 hour.</p>
-          <p>If you didn't request this, please ignore this email.</p>
+<div style="
+  max-width: 600px;
+  margin: 0 auto;
+  padding: 40px 30px;
+  background: #f9fafb;
+  font-family: 'Segoe UI', Roboto, Arial, sans-serif;
+  color: #1f2937;
+  border-radius: 16px;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.05);
+  border: 1px solid #e5e7eb;
+">
+
+  <!-- Header with Fallback Gradient Effect -->
+  <table align="center" role="presentation" border="0" cellpadding="0" cellspacing="0" style="margin: 0 auto 16px auto;">
+    <tr>
+      <td align="center">
+        <h1 style="
+          font-size: 32px;
+          font-weight: 800;
+          margin: 0;
+          text-align: center;
+          font-family: 'Segoe UI', Roboto, Arial, sans-serif;
+        ">
+          <span style="color: #3b82f6;">Uptime</span><span style="color: #a855f7;">Monitor</span>
+        </h1>
+      </td>
+    </tr>
+  </table>
+
+  <!-- Subtitle -->
+  <h2 style="
+    font-size: 26px;
+    font-weight: 700;
+    color: #111827;
+    text-align: center;
+    margin-bottom: 12px;
+    margin-top: 0;
+  ">
+    Password Reset Requested
+  </h2>
+
+  <!-- Description -->
+  <p style="
+    font-size: 16px;
+    color: #4b5563;
+    text-align: center;
+    margin-bottom: 24px;
+    margin-top: 0;
+  ">
+    You recently requested to reset your password. Click the button below to continue.
+  </p>
+
+  <!-- Reset Button -->
+  <table align="center" role="presentation" border="0" cellpadding="0" cellspacing="0" style="margin: 30px auto;">
+    <tr>
+      <td align="center" bgcolor="#3b82f6" style="border-radius: 9999px; background: linear-gradient(to right, #3b82f6, #6366f1);">
+        <a href="${resetUrl}" style="
+          display: inline-block;
+          padding: 14px 32px;
+          font-size: 16px;
+          font-weight: 600;
+          color: #ffffff;
+          text-decoration: none;
+          border-radius: 9999px;
+          font-family: 'Segoe UI', Roboto, Arial, sans-serif;
+        ">
+          Reset Password
+        </a>
+      </td>
+    </tr>
+  </table>
+
+  <!-- Expiry Info -->
+  <p style="
+    font-size: 14px;
+    color: #6b7280;
+    text-align: center;
+    margin-top: 10px;
+    margin-bottom: 0;
+  ">
+    This link will expire in <strong>1 hour</strong>.
+  </p>
+
+  <!-- Footer -->
+  <p style="
+    font-size: 13px;
+    color: #9ca3af;
+    text-align: center;
+    margin-top: 24px;
+    margin-bottom: 0;
+  ">
+    If you didn’t request this, you can safely ignore this email.<br/>
+    &copy; Uptime Monitor. All rights reserved.
+  </p>
+</div>
         `
       });
     } catch (emailError) {

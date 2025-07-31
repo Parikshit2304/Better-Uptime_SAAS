@@ -25,8 +25,10 @@
     "helmet": "^8.1.0",
     "jsonwebtoken": "^9.0.2",
     "nodemailer": "^7.0.5",
+    "ping": "^0.4.4",
     "stripe": "^18.3.0",
-    "twilio": "^5.7.3"
+    "twilio": "^5.7.3",
+    "url": "^0.11.4"
   },
   "devDependencies": {
     "concurrently": "^8.2.2",

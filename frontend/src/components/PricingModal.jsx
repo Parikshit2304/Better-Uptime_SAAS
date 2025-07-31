@@ -192,7 +192,7 @@ function PricingModal({ isOpen, onClose, currentUser, onPlanChange }) {
           {/* Plans Grid */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             {orderedPlans.map((plan) => {
-              const isCurrentPlan = currentSubscription?.planType === plan.key;
+              const isCurrentPlan = currentSubscription?.planType === plan.key ;
               const isPopular = plan.key === 'starter';
               
               return (
