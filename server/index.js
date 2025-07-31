@@ -276,27 +276,52 @@ async function calculateUptimeStats(websiteId) {
 }
 
 // Monitoring function
-
 async function checkWebsite(website) {
   try {
     console.log(`Checking ${website.name} (${website.url})`);
-
     const hostname = new URL(website.url).hostname;
+    const startTime = Date.now();
 
+    // Step 1: Try Ping
     const pingResult = await ping.promise.probe(hostname, {
       timeout: 5,
-      extra: ["-n", "2"], // ← use ['-c', '2'] for Linux/Mac
+      extra: ['-n', '2'], // Use ['-c', '2'] on Linux/Mac
     });
 
-    // console.log("Full ping result:", pingResult);
+    let isUp = pingResult.alive;
+    let responseTime = Date.now() - startTime;
 
-    const responseTime = pingResult.time ?? 0;
-    const isUp = pingResult.alive;
+    // console.log("Ping Result:", pingResult);
 
-    const newStatus = isUp ? "up" : "down";
-    const previousStatus = statusCache.get(website.id) || "unknown";
+    // Step 2: If Ping failed, try HTTP request
+    if (!isUp) {
+      console.log(`Ping failed for ${website.name}, trying HTTP request...`);
+      try {
+        const httpStart = Date.now();
+        const response = await axios.get(website.url, {
+          timeout: 10000,
+          validateStatus: (status) => status < 500,
+          headers: {
+            'User-Agent': 'Uptime-Monitor/1.0'
+          },
+          maxRedirects: 5
+        });
+        responseTime = Date.now() - httpStart;
+        isUp = response.status < 500;
 
-    if (newStatus === "up" && previousStatus === "down") {
+        console.log(`HTTP fallback status: ${response.status}`);
+      } catch (httpError) {
+        console.error(`HTTP fallback error for ${website.name}: ${httpError.message}`);
+        isUp = false;
+        responseTime = null;
+      }
+    }
+
+    const newStatus = isUp ? 'up' : 'down';
+    const previousStatus = statusCache.get(website.id) || 'unknown';
+
+    // Notify if transition from down → up
+    if (newStatus === 'up' && previousStatus === 'down') {
       console.log(`✅ ${website.name} is back up`);
       await sendAlertEmail(
         website.url,
@@ -308,39 +333,41 @@ async function checkWebsite(website) {
 
     statusCache.set(website.id, newStatus);
 
+    // Update website status in DB
     await prisma.website.update({
       where: { id: website.id },
       data: {
         status: newStatus,
         lastChecked: new Date(),
-        responseTime: responseTime,
-      },
+        responseTime
+      }
     });
 
+    // Save check record
     await prisma.uptimeCheck.create({
       data: {
         websiteId: website.id,
         status: newStatus,
-        responseTime: responseTime,
-        timestamp: new Date(),
-      },
+        responseTime,
+        timestamp: new Date()
+      }
     });
 
     if (!isUp) {
-      await handleDowntime(website.id, `Ping failed`);
+      await handleDowntime(website.id, 'Ping and HTTP check failed');
     } else {
       await handleUptime(website.id);
     }
 
-    console.log(
-      `✓ ${website.name}: ${isUp ? "UP" : "DOWN"} (Ping: ${responseTime}ms)`
-    );
+    console.log(`✓ ${website.name}: ${isUp ? 'UP' : 'DOWN'} (${responseTime ?? '-'}ms)`);
+
   } catch (error) {
     console.error(`✗ ${website.name}: ERROR - ${error.message}`);
-    const newStatus = "down";
-    const previousStatus = statusCache.get(website.id) || "unknown";
 
-    if (newStatus === "down" && previousStatus !== "down") {
+    const newStatus = 'down';
+    const previousStatus = statusCache.get(website.id) || 'unknown';
+
+    if (newStatus === 'down' && previousStatus !== 'down') {
       console.log(`🔔 Alert: ${website.name} went down`);
       await sendAlertEmail(
         website.url,
@@ -355,24 +382,25 @@ async function checkWebsite(website) {
     await prisma.website.update({
       where: { id: website.id },
       data: {
-        status: "down",
+        status: 'down',
         lastChecked: new Date(),
-        responseTime: null,
-      },
+        responseTime: null
+      }
     });
 
     await prisma.uptimeCheck.create({
       data: {
         websiteId: website.id,
-        status: "down",
+        status: 'down',
         responseTime: null,
-        timestamp: new Date(),
-      },
+        timestamp: new Date()
+      }
     });
 
     await handleDowntime(website.id, error.message);
   }
 }
+
 
 async function handleDowntime(websiteId, reason) {
   try {
