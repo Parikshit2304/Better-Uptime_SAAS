@@ -276,26 +276,34 @@ async function calculateUptimeStats(websiteId) {
 }
 
 // Monitoring function
+
+function isIPAddress(hostname) {
+  return /^(\d{1,3}\.){3}\d{1,3}$/.test(hostname);
+}
+
 async function checkWebsite(website) {
   try {
     console.log(`Checking ${website.name} (${website.url})`);
+
     const hostname = new URL(website.url).hostname;
-    const startTime = Date.now();
+    const checkStart = Date.now();
 
-    // Step 1: Try Ping
-    const pingResult = await ping.promise.probe(hostname, {
-      timeout: 5,
-      extra: ['-n', '2'], // Use ['-c', '2'] on Linux/Mac
-    });
+    let isUp = false;
+    let responseTime = null;
 
-    let isUp = pingResult.alive;
-    let responseTime = Date.now() - startTime;
+    // 🔹 Check if IP → Use Ping
+    if (isIPAddress(hostname)) {
+      const pingResult = await ping.promise.probe(hostname, {
+        timeout: 5,
+        extra: ['-n', '2'] // Use ['-c', '2'] for Linux/Mac
+      });
 
-    // console.log("Ping Result:", pingResult);
+      isUp = pingResult.alive;
+      responseTime = pingResult.time ? Math.round(parseFloat(pingResult.time)) : null;
+      console.log(`🟦 Ping Check: ${hostname} is ${isUp ? 'UP' : 'DOWN'} (${responseTime ?? '-'}ms)`);
 
-    // Step 2: If Ping failed, try HTTP request
-    if (!isUp) {
-      console.log(`Ping failed for ${website.name}, trying HTTP request...`);
+    } else {
+      // 🔹 If hostname is a domain → use HTTP
       try {
         const httpStart = Date.now();
         const response = await axios.get(website.url, {
@@ -308,10 +316,9 @@ async function checkWebsite(website) {
         });
         responseTime = Date.now() - httpStart;
         isUp = response.status < 500;
-
-        console.log(`HTTP fallback status: ${response.status}`);
-      } catch (httpError) {
-        console.error(`HTTP fallback error for ${website.name}: ${httpError.message}`);
+        console.log(`🌐 HTTP Check: ${website.url} is ${isUp ? 'UP' : 'DOWN'} (${response.status}, ${responseTime}ms)`);
+      } catch (httpErr) {
+        console.error(`🌐 HTTP error: ${httpErr.message}`);
         isUp = false;
         responseTime = null;
       }
@@ -319,10 +326,22 @@ async function checkWebsite(website) {
 
     const newStatus = isUp ? 'up' : 'down';
     const previousStatus = statusCache.get(website.id) || 'unknown';
+    console.log(`Status: ${previousStatus} ➜ ${newStatus}`);
 
-    // Notify if transition from down → up
+    // 🔔 Alert if went down
+    if (newStatus === 'down' && previousStatus !== 'down') {
+      console.log(`🔔 ${website.name} went DOWN`);
+      await sendAlertEmail(
+        website.url,
+        website.user.email,
+        `🚨 ${website.name} is DOWN`,
+        `URL: ${website.url} went down at ${new Date().toLocaleString()}`
+      );
+    }
+
+    // ✅ Alert if came back up
     if (newStatus === 'up' && previousStatus === 'down') {
-      console.log(`✅ ${website.name} is back up`);
+      console.log(`✅ ${website.name} is back UP`);
       await sendAlertEmail(
         website.url,
         website.user.email,
@@ -331,9 +350,10 @@ async function checkWebsite(website) {
       );
     }
 
+    // Update status cache
     statusCache.set(website.id, newStatus);
 
-    // Update website status in DB
+    // Update DB
     await prisma.website.update({
       where: { id: website.id },
       data: {
@@ -343,7 +363,6 @@ async function checkWebsite(website) {
       }
     });
 
-    // Save check record
     await prisma.uptimeCheck.create({
       data: {
         websiteId: website.id,
@@ -353,22 +372,23 @@ async function checkWebsite(website) {
       }
     });
 
-    if (!isUp) {
-      await handleDowntime(website.id, 'Ping and HTTP check failed');
-    } else {
+    if (isUp) {
       await handleUptime(website.id);
+    } else {
+      await handleDowntime(website.id, 'Connectivity failed');
     }
 
     console.log(`✓ ${website.name}: ${isUp ? 'UP' : 'DOWN'} (${responseTime ?? '-'}ms)`);
 
   } catch (error) {
-    console.error(`✗ ${website.name}: ERROR - ${error.message}`);
+    console.error(`❌ Error checking ${website.name}: ${error.message}`);
 
     const newStatus = 'down';
     const previousStatus = statusCache.get(website.id) || 'unknown';
 
+    // 🔔 Alert if error caused status drop
     if (newStatus === 'down' && previousStatus !== 'down') {
-      console.log(`🔔 Alert: ${website.name} went down`);
+      console.log(`🔔 ${website.name} went DOWN (exception)`);
       await sendAlertEmail(
         website.url,
         website.user.email,
@@ -400,6 +420,7 @@ async function checkWebsite(website) {
     await handleDowntime(website.id, error.message);
   }
 }
+
 
 
 async function handleDowntime(websiteId, reason) {
